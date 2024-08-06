@@ -11,3 +11,5 @@
 
 # ----
 /backend/_bin
+/backend/.env
+/backend/.env.*

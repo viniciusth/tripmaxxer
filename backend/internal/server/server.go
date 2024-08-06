@@ -1,18 +1,23 @@
 package server
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/viniciusth/tripmaxxer/internal/clients"
+)
 
 type ServerDependencies struct {
+    Storage *clients.Storage
 }
 
-func SetupServer(deps ServerDependencies) *http.Server {
-    http.HandleFunc("/", helloWorld)
+func SetupServer(deps *ServerDependencies) *http.Server {
+    http.HandleFunc("/health", deps.health)
 	return &http.Server{
 		Addr:    ":8080",
 		Handler: nil,
 	}
 }
 
-func helloWorld(w http.ResponseWriter, r *http.Request) {
-    w.Write([]byte("Hello, World!"))
+func (s *ServerDependencies) health(w http.ResponseWriter, r *http.Request) {
+    w.Write([]byte("OK"))
 }

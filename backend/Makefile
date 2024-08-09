@@ -7,6 +7,3 @@ run:
 	@echo "Running..."
 	@go run ./cmd/server/main.go
 
-migrate:
-	@echo "Migrating..."
-	@go run ./cmd/migrations/main.go

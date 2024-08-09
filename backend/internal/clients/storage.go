@@ -1,6 +1,7 @@
 package clients
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -8,25 +9,30 @@ import (
 )
 
 type Storage struct {
-	client *pgx.ConnPool
+	pool *pgx.ConnPool
 }
 
 func NewStorage() (*Storage, error) {
     cfg, err := pgx.ParseURI(os.Getenv("DB_URL"))
     if err != nil {
-        return nil, err
+        return nil, fmt.Errorf("failed to parse DB_URL: %w", err)
     }
 
-    client, err := pgx.NewConnPool(pgx.ConnPoolConfig{
+    pool, err := pgx.NewConnPool(pgx.ConnPoolConfig{
     	ConnConfig: cfg,
     	MaxConnections: 5,
     	AcquireTimeout: 5 * time.Second,
     })
 
-    return &Storage{client: client}, nil
+    _, err = pool.Exec("SELECT 1;")
+    if err != nil {
+        return nil, fmt.Errorf("failed to connect to database: %w", err)
+    }
+
+    return &Storage{pool: pool}, nil
 }
 
 func (s *Storage) Close() {
-    s.client.Close()
+    s.pool.Close()
 }
 

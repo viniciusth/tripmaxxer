@@ -1,30 +1,23 @@
 package clients
 
 import (
+	"context"
 	"fmt"
 	"os"
-	"time"
 
-	"github.com/jackc/pgx"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Storage struct {
-	pool *pgx.ConnPool
+	pool *pgxpool.Pool
 }
 
 func NewStorage() (*Storage, error) {
-    cfg, err := pgx.ParseURI(os.Getenv("DB_URL"))
-    if err != nil {
-        return nil, fmt.Errorf("failed to parse DB_URL: %w", err)
-    }
 
-    pool, err := pgx.NewConnPool(pgx.ConnPoolConfig{
-    	ConnConfig: cfg,
-    	MaxConnections: 5,
-    	AcquireTimeout: 5 * time.Second,
-    })
+    url := fmt.Sprintf("%s&pool_max_conns=10&pool_max_conn_lifetime=5s", os.Getenv("DB_URL"))
+    pool, err := pgxpool.New(context.Background(), url)
 
-    _, err = pool.Exec("SELECT 1;")
+    _, err = pool.Exec(context.Background(), "SELECT 1;")
     if err != nil {
         return nil, fmt.Errorf("failed to connect to database: %w", err)
     }
